@@ -19,15 +19,9 @@ public class HideAndSeekPlugin extends JavaPlugin implements Module {
 
     @Inject
     private GameHandler gameHandler;
-    @Inject
-    private Injector injector;
-    @Inject
-    private HideAndSeekPlugin plugin;
 
     @Override
     public void onLoad() {
-        plugin = injector.getInstance(HideAndSeekPlugin.class);
-
         ModuleHandler.offerModule(this);
     }
 

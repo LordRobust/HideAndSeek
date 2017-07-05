@@ -30,8 +30,8 @@ public class HideAndSeekGame extends AbstractGame {
         HideAndSeekPhase mainPhase = createPhase(HideAndSeekPhase.class);
 
         lobbyPhase.setNextPhase(votePhase);
-        lobbyPhase.setNextPhase(gracePhase);
-        lobbyPhase.setNextPhase(mainPhase);
+        votePhase.setNextPhase(gracePhase);
+        gracePhase.setNextPhase(mainPhase);
 
         activePhase = lobbyPhase;
 
