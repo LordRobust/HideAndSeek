@@ -1,18 +1,16 @@
 package io.indices.hideandseek;
 
-import io.indices.hideandseek.phases.HideAndSeekPhase;
-import io.indices.hideandseek.phases.HidingPhase;
+import javax.annotation.Nonnull;
+
 import me.minidigger.voxelgameslib.game.AbstractGame;
 import me.minidigger.voxelgameslib.game.GameDefinition;
 import me.minidigger.voxelgameslib.game.GameInfo;
-import me.minidigger.voxelgameslib.phase.phases.GracePhase;
 import me.minidigger.voxelgameslib.phase.phases.LobbyPhase;
 import me.minidigger.voxelgameslib.phase.phases.VotePhase;
 
-import javax.annotation.Nonnull;
-import javax.inject.Singleton;
+import io.indices.hideandseek.phases.HideAndSeekPhase;
+import io.indices.hideandseek.phases.HidingPhase;
 
-@Singleton
 @GameInfo(name = "HideAndSeek", author = "aphel", version = "1.0", description = "Everyone knows hide and seek!")
 public class HideAndSeekGame extends AbstractGame {
 

@@ -1,6 +1,8 @@
 package io.indices.hideandseek;
 
-import com.google.inject.Injector;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import me.minidigger.voxelgameslib.game.GameHandler;
 import me.minidigger.voxelgameslib.game.GameMode;
 import me.minidigger.voxelgameslib.module.Module;
@@ -8,9 +10,6 @@ import me.minidigger.voxelgameslib.module.ModuleHandler;
 import me.minidigger.voxelgameslib.module.ModuleInfo;
 
 import org.bukkit.plugin.java.JavaPlugin;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 @ModuleInfo(name = "HideAndSeek", authors = "aphel", version = "1.0")
