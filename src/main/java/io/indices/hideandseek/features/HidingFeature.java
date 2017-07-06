@@ -1,29 +1,35 @@
 package io.indices.hideandseek.features;
 
+import co.aikar.commands.annotation.*;
+import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
+import com.comphenix.packetwrapper.WrapperPlayServerMount;
+import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity;
+import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntityLiving;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+import io.indices.hideandseek.util.NmsUtil;
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
+import me.minidigger.voxelgameslib.feature.AbstractFeatureCommand;
+import me.minidigger.voxelgameslib.feature.FeatureCommandImplementor;
 import me.minidigger.voxelgameslib.feature.features.MapFeature;
+import me.minidigger.voxelgameslib.feature.features.SpawnFeature;
+import me.minidigger.voxelgameslib.lang.Lang;
+import me.minidigger.voxelgameslib.lang.LangKey;
 import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
 import me.minidigger.voxelgameslib.user.User;
 import me.minidigger.voxelgameslib.user.UserHandler;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
-import net.minecraft.server.v1_12_R1.EntityFallingBlock;
-import net.minecraft.server.v1_12_R1.EntityPlayer;
-import net.minecraft.server.v1_12_R1.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_12_R1.PacketPlayOutSpawnEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import javax.inject.Inject;
-import java.lang.reflect.Field;
+import javax.inject.Singleton;
 import java.util.*;
 
-public class HidingFeature extends AbstractFeature {
+public class HidingFeature extends AbstractFeature implements FeatureCommandImplementor {
 
     private Scoreboard scoreboard;
 
@@ -61,48 +67,65 @@ public class HidingFeature extends AbstractFeature {
         getPhase().getGame().getPlayers().forEach((user -> {
             if(!seekers.contains(user)) {
                 Player player = user.getPlayer();
-                EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
                 hiders.add(user);
 
                 assignBlock(user);
 
-                Location playerLoc = new Location(Bukkit.getWorld("highjacked"), -447, 40, 154);
-                World world = Bukkit.getWorld("highjacked");
-                Bukkit.getWorlds().forEach((w) -> Bukkit.getLogger().info(w.getName()));
+                int playerEntityId = player.getEntityId();
 
-                int playerEntityId = entityPlayer.getId();
-                UUID playerEntityUuid = entityPlayer.getUniqueID();
+                // i would rather use NMS, but i was convinced to use protocollib
+                // welcome to the evil side, i suppose
+                WrapperPlayServerEntityDestroy destroyPacket = new WrapperPlayServerEntityDestroy();
+                destroyPacket.setEntityIds(new int[]{playerEntityId});
 
-                EntityFallingBlock entityFallingBlock = new EntityFallingBlock(((CraftWorld) world).getHandle());
-                entityFallingBlock.setLocation(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), 0, 0);
-                PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityFallingBlock, 70, playerBlockMap.get(user).getId());
+                WrapperPlayServerSpawnEntityLiving silverfishSpawnPacket = new WrapperPlayServerSpawnEntityLiving();
+                silverfishSpawnPacket.setEntityID(playerEntityId);
+                silverfishSpawnPacket.setUniqueId(UUID.randomUUID());
+                silverfishSpawnPacket.setType(EntityType.SILVERFISH);
 
-                try {
-                    Field blockEntityIdField = packetPlayOutSpawnEntity.getClass().getDeclaredField("a");
-                    blockEntityIdField.setAccessible(true);
-                    blockEntityIdField.setInt(packetPlayOutSpawnEntity, playerEntityId);
-                    blockEntityIdField.setAccessible(false);
+                Location location = player.getLocation();
+                silverfishSpawnPacket.setX(location.getX());
+                silverfishSpawnPacket.setY(location.getY());
+                silverfishSpawnPacket.setZ(location.getZ());
+                silverfishSpawnPacket.setPitch(location.getPitch());
+                silverfishSpawnPacket.setYaw(location.getYaw());
 
-                    Field blockEntityUuidField = packetPlayOutSpawnEntity.getClass().getDeclaredField("b");
-                    blockEntityUuidField.setAccessible(true);
-                    blockEntityUuidField.set(packetPlayOutSpawnEntity, playerEntityUuid);
-                    blockEntityUuidField.setAccessible(false);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                WrappedDataWatcher silverfishDataWatcher = new WrappedDataWatcher();
+                silverfishDataWatcher.setObject(0, WrappedDataWatcher.Registry.get(Byte.class), (byte) 0x20, true);
+                silverfishDataWatcher.setObject(4, WrappedDataWatcher.Registry.get(Boolean.class), true, true);
+                silverfishDataWatcher.setObject(5, WrappedDataWatcher.Registry.get(Boolean.class), true, true);
+                //silverfishDataWatcher.setObject(12, WrappedDataWatcher.Registry.get(Integer.class), 2, true); // Set size
+                silverfishSpawnPacket.setMetadata(silverfishDataWatcher);
+
+                WrapperPlayServerSpawnEntity blockSpawnPacket = new WrapperPlayServerSpawnEntity();
+                int blockEntityId = NmsUtil.getNextEntityId();
+                blockSpawnPacket.setEntityID(blockEntityId);
+                blockSpawnPacket.setUniqueId(UUID.randomUUID());
+                blockSpawnPacket.setType(70);
+                blockSpawnPacket.setObjectData(playerBlockMap.get(user).getId());
+
+                blockSpawnPacket.setX(location.getX());
+                blockSpawnPacket.setY(location.getY());
+                blockSpawnPacket.setZ(location.getZ());
+                blockSpawnPacket.setPitch(location.getPitch());
+                blockSpawnPacket.setYaw(location.getYaw());
+
+                WrapperPlayServerMount mount = new WrapperPlayServerMount();
+                mount.setEntityID(player.getEntityId());
+                mount.setPassengerIds(new int[]{blockEntityId});
 
                 getPhase().getGame().getPlayers().stream().filter((otherU) -> !otherU.getUuid().equals(user.getUuid())).forEach((otherU) -> {
-                    EntityPlayer otherEntityPlayer = ((CraftPlayer) otherU.getPlayer()).getHandle();
+                    Player otherPlayer = otherU.getPlayer();
 
                     Bukkit.getLogger().info(otherU.getRawDisplayName());
 
-                    // despawn player
-                    otherEntityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityDestroy(playerEntityId));
-                    // create block with their id
-                    otherEntityPlayer.playerConnection.sendPacket(packetPlayOutSpawnEntity);
+                    destroyPacket.sendPacket(otherPlayer);
+                    silverfishSpawnPacket.sendPacket(otherPlayer);
+                    blockSpawnPacket.sendPacket(otherPlayer);
+                    mount.sendPacket(otherPlayer);
                 });
 
-                user.setPrefix(TextComponent.of("[H] ").color(TextColor.GREEN).append(user.getPrefix()));
+                //user.setPrefix(TextComponent.of("[H] ").color(TextColor.GREEN).append(user.getPrefix()));
                 player.sendTitle("You have 30 seconds to hide!", null, 10, 70, 20);
             }
         }));
@@ -144,6 +167,74 @@ public class HidingFeature extends AbstractFeature {
 
     @Override
     public Class[] getDependencies() {
-        return new Class[]{MapFeature.class};
+        return new Class[]{MapFeature.class, SpawnFeature.class};
+    }
+
+    @Override
+    public AbstractFeatureCommand getCommandClass() {
+        return new HidingFeatureCommands();
+    }
+
+    @Singleton
+    public class HidingFeatureCommands extends AbstractFeatureCommand {
+
+        @CommandAlias("disguise")
+        @CommandPermission("%user")
+        public void disguise(User user) {
+            Player player = user.getPlayer();
+
+            int playerEntityId = player.getEntityId();
+
+            // i would rather use NMS, but i was convinced to use protocollib
+            // welcome to the evil side, i suppose
+            WrapperPlayServerEntityDestroy destroyPacket = new WrapperPlayServerEntityDestroy();
+            destroyPacket.setEntityIds(new int[]{playerEntityId});
+
+            WrapperPlayServerSpawnEntityLiving silverfishSpawnPacket = new WrapperPlayServerSpawnEntityLiving();
+            silverfishSpawnPacket.setEntityID(playerEntityId);
+            silverfishSpawnPacket.setUniqueId(UUID.randomUUID());
+            silverfishSpawnPacket.setType(EntityType.SILVERFISH);
+
+            Location location = player.getLocation();
+            silverfishSpawnPacket.setX(location.getX());
+            silverfishSpawnPacket.setY(location.getY());
+            silverfishSpawnPacket.setZ(location.getZ());
+            silverfishSpawnPacket.setPitch(location.getPitch());
+            silverfishSpawnPacket.setYaw(location.getYaw());
+
+            WrappedDataWatcher silverfishDataWatcher = new WrappedDataWatcher();
+            silverfishDataWatcher.setObject(0, WrappedDataWatcher.Registry.get(Byte.class), (byte) 0x20, true);
+            silverfishDataWatcher.setObject(4, WrappedDataWatcher.Registry.get(Boolean.class), true, true);
+            silverfishDataWatcher.setObject(5, WrappedDataWatcher.Registry.get(Boolean.class), true, true);
+            //silverfishDataWatcher.setObject(12, WrappedDataWatcher.Registry.get(Integer.class), 2, true); // Set size
+            silverfishSpawnPacket.setMetadata(silverfishDataWatcher);
+
+            WrapperPlayServerSpawnEntity blockSpawnPacket = new WrapperPlayServerSpawnEntity();
+            int blockEntityId = NmsUtil.getNextEntityId();
+            blockSpawnPacket.setEntityID(blockEntityId);
+            blockSpawnPacket.setUniqueId(UUID.randomUUID());
+            blockSpawnPacket.setType(70);
+            blockSpawnPacket.setObjectData(playerBlockMap.get(user).getId());
+
+            blockSpawnPacket.setX(location.getX());
+            blockSpawnPacket.setY(location.getY());
+            blockSpawnPacket.setZ(location.getZ());
+            blockSpawnPacket.setPitch(location.getPitch());
+            blockSpawnPacket.setYaw(location.getYaw());
+
+            WrapperPlayServerMount mount = new WrapperPlayServerMount();
+            mount.setEntityID(player.getEntityId());
+            mount.setPassengerIds(new int[]{blockEntityId});
+
+            Bukkit.getOnlinePlayers().stream().filter(p -> p != player).forEach((otherU) -> {
+                Player otherPlayer = otherU.getPlayer();
+
+                destroyPacket.sendPacket(otherPlayer);
+                silverfishSpawnPacket.sendPacket(otherPlayer);
+                blockSpawnPacket.sendPacket(otherPlayer);
+                mount.sendPacket(otherPlayer);
+            });
+        }
+
     }
 }
