@@ -7,6 +7,8 @@ import me.minidigger.voxelgameslib.user.UserHandler;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import net.minecraft.server.v1_12_R1.EntityFallingBlock;
+import net.minecraft.server.v1_12_R1.EntityPlayer;
+import net.minecraft.server.v1_12_R1.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_12_R1.PacketPlayOutSpawnEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -15,11 +17,9 @@ import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_12_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.material.MaterialData;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 
 import javax.inject.Inject;
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class HidingFeature extends AbstractFeature {
@@ -49,7 +49,7 @@ public class HidingFeature extends AbstractFeature {
 
         Random random = new Random();
         int playerCount = getPhase().getGame().getPlayers().size();
-        int seekerAmount = playerCount / 10; // one seeker per 10 players
+        int seekerAmount = (playerCount / 10) + 1; // one seeker per 10 players
 
         for(int i = 0; i < seekerAmount; i++) {
             int n = random.nextInt(playerCount - 1);
@@ -60,22 +60,45 @@ public class HidingFeature extends AbstractFeature {
         getPhase().getGame().getPlayers().forEach((user -> {
             if(!seekers.contains(user)) {
                 Player player = user.getPlayer();
+                EntityPlayer entityPlayer = ((CraftPlayer) player).getHandle();
                 hiders.add(user);
 
                 assignBlock(user);
-
-                player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, Integer.MAX_VALUE, 0, false, false));
 
                 Location playerLoc = new Location(Bukkit.getWorld("highjacked"), -447, 40, 154);
                 World world = Bukkit.getWorld("highjacked");
                 Bukkit.getWorlds().forEach((w) -> Bukkit.getLogger().info(w.getName()));
 
+                int playerEntityId = entityPlayer.getId();
+                UUID playerEntityUuid = entityPlayer.getUniqueID();
+
                 EntityFallingBlock entityFallingBlock = new EntityFallingBlock(((CraftWorld) world).getHandle());
-                entityFallingBlock.setLocation(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), 0, 0);
-                PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityFallingBlock, 70, (playerBlockMap.get(user).getId()));
+                //entityFallingBlock.setLocation(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), 0, 0);
+                PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityFallingBlock, 70, playerBlockMap.get(user).getId());
+
+                try {
+                    Field blockEntityIdField = packetPlayOutSpawnEntity.getClass().getDeclaredField("a");
+                    blockEntityIdField.setAccessible(true);
+                    blockEntityIdField.setInt(null, playerEntityId);
+                    blockEntityIdField.setAccessible(false);
+
+                    Field blockEntityUuidField = packetPlayOutSpawnEntity.getClass().getDeclaredField("b");
+                    blockEntityUuidField.setAccessible(true);
+                    blockEntityUuidField.set(null, playerEntityUuid);
+                    blockEntityUuidField.setAccessible(false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
                 getPhase().getGame().getPlayers().forEach((otherU) -> {
-                    ((CraftPlayer) otherU.getPlayer()).getHandle().playerConnection.sendPacket(packetPlayOutSpawnEntity);
+                    if(otherU.equals(user)) {
+                        return;
+                    }
+
+                    // despawn player
+                    entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityDestroy(playerEntityId));
+                    // create block with their id
+                     entityPlayer.playerConnection.sendPacket(packetPlayOutSpawnEntity);
                 });
 
                 user.setPrefix(TextComponent.of("[H] ").color(TextColor.GREEN).append(user.getPrefix()));

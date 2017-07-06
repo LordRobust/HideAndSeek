@@ -76,7 +76,6 @@ public class HideAndSeekFeature extends AbstractFeature {
                 if(hiders.contains(user)) {
                     hiders.remove(user);
                     seekers.add(user); // you've joined the evil side now
-                    user.getPlayer().removePotionEffect(PotionEffectType.INVISIBILITY);
                 }
             }
         }));
