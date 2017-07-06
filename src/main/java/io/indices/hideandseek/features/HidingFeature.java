@@ -1,6 +1,7 @@
 package io.indices.hideandseek.features;
 
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
+import me.minidigger.voxelgameslib.feature.features.MapFeature;
 import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
 import me.minidigger.voxelgameslib.user.User;
 import me.minidigger.voxelgameslib.user.UserHandler;
@@ -73,36 +74,36 @@ public class HidingFeature extends AbstractFeature {
                 UUID playerEntityUuid = entityPlayer.getUniqueID();
 
                 EntityFallingBlock entityFallingBlock = new EntityFallingBlock(((CraftWorld) world).getHandle());
-                //entityFallingBlock.setLocation(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), 0, 0);
+                entityFallingBlock.setLocation(playerLoc.getX(), playerLoc.getY(), playerLoc.getZ(), 0, 0);
                 PacketPlayOutSpawnEntity packetPlayOutSpawnEntity = new PacketPlayOutSpawnEntity(entityFallingBlock, 70, playerBlockMap.get(user).getId());
 
                 try {
                     Field blockEntityIdField = packetPlayOutSpawnEntity.getClass().getDeclaredField("a");
                     blockEntityIdField.setAccessible(true);
-                    blockEntityIdField.setInt(null, playerEntityId);
+                    blockEntityIdField.setInt(packetPlayOutSpawnEntity, playerEntityId);
                     blockEntityIdField.setAccessible(false);
 
                     Field blockEntityUuidField = packetPlayOutSpawnEntity.getClass().getDeclaredField("b");
                     blockEntityUuidField.setAccessible(true);
-                    blockEntityUuidField.set(null, playerEntityUuid);
+                    blockEntityUuidField.set(packetPlayOutSpawnEntity, playerEntityUuid);
                     blockEntityUuidField.setAccessible(false);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                getPhase().getGame().getPlayers().forEach((otherU) -> {
-                    if(otherU.equals(user)) {
-                        return;
-                    }
+                getPhase().getGame().getPlayers().stream().filter((otherU) -> !otherU.getUuid().equals(user.getUuid())).forEach((otherU) -> {
+                    EntityPlayer otherEntityPlayer = ((CraftPlayer) otherU.getPlayer()).getHandle();
+
+                    Bukkit.getLogger().info(otherU.getRawDisplayName());
 
                     // despawn player
-                    entityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityDestroy(playerEntityId));
+                    otherEntityPlayer.playerConnection.sendPacket(new PacketPlayOutEntityDestroy(playerEntityId));
                     // create block with their id
-                     entityPlayer.playerConnection.sendPacket(packetPlayOutSpawnEntity);
+                    otherEntityPlayer.playerConnection.sendPacket(packetPlayOutSpawnEntity);
                 });
 
                 user.setPrefix(TextComponent.of("[H] ").color(TextColor.GREEN).append(user.getPrefix()));
-                player.sendTitle("It's time to hide!", null, 1, 3, 0);
+                player.sendTitle("You have 30 seconds to hide!", null, 10, 70, 20);
             }
         }));
 
@@ -143,6 +144,6 @@ public class HidingFeature extends AbstractFeature {
 
     @Override
     public Class[] getDependencies() {
-        return new Class[0];
+        return new Class[]{MapFeature.class};
     }
 }
