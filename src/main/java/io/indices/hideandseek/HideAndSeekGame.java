@@ -1,6 +1,7 @@
 package io.indices.hideandseek;
 
 import io.indices.hideandseek.phases.HideAndSeekPhase;
+import io.indices.hideandseek.phases.HidingPhase;
 import me.minidigger.voxelgameslib.game.AbstractGame;
 import me.minidigger.voxelgameslib.game.GameDefinition;
 import me.minidigger.voxelgameslib.game.GameInfo;
@@ -26,12 +27,12 @@ public class HideAndSeekGame extends AbstractGame {
 
         LobbyPhase lobbyPhase = createPhase(LobbyPhase.class);
         VotePhase votePhase = createPhase(VotePhase.class);
-        GracePhase gracePhase = createPhase(GracePhase.class);
+        HidingPhase hidingPhase = createPhase(HidingPhase.class);
         HideAndSeekPhase mainPhase = createPhase(HideAndSeekPhase.class);
 
         lobbyPhase.setNextPhase(votePhase);
-        votePhase.setNextPhase(gracePhase);
-        gracePhase.setNextPhase(mainPhase);
+        votePhase.setNextPhase(hidingPhase);
+        hidingPhase.setNextPhase(mainPhase);
 
         activePhase = lobbyPhase;
 

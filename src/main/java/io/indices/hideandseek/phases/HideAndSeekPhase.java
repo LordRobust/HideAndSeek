@@ -11,7 +11,7 @@ public class HideAndSeekPhase extends TimedPhase {
     @Override
     public void init() {
         setName("HideAndSeekPhase");
-        setTicks(10 * 60 * GameConstants.TPS); // 10 minutes
+        setTicks(1 * 60 * GameConstants.TPS); // todo set to 10 minutes
         super.init();
         setAllowJoin(false);
         setAllowSpectate(true);
@@ -21,7 +21,7 @@ public class HideAndSeekPhase extends TimedPhase {
         addFeature(mapFeature);
 
         SpawnFeature spawnFeature = getGame().createFeature(SpawnFeature.class, this);
-        spawnFeature.setRespawn(false);
+        spawnFeature.setRespawn(true);
         addFeature(spawnFeature);
 
         GameModeFeature gameModeFeature = getGame().createFeature(GameModeFeature.class, this);
