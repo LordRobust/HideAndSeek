@@ -22,6 +22,7 @@ public class HideAndSeekPhase extends TimedPhase {
 
         SpawnFeature spawnFeature = getGame().createFeature(SpawnFeature.class, this);
         spawnFeature.setRespawn(true);
+        spawnFeature.setInitialSpawn(false);
         addFeature(spawnFeature);
 
         GameModeFeature gameModeFeature = getGame().createFeature(GameModeFeature.class, this);
