@@ -8,6 +8,8 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
 import io.indices.hideandseek.util.NmsUtil;
@@ -65,7 +67,7 @@ public class GameFeature extends AbstractFeature {
 
     @Override
     public Class[] getDependencies() {
-        return new Class[]{MapFeature.class, SpawnFeature.class, ScoreboardFeature.class};
+        return new Class[]{MapFeature.class, ScoreboardFeature.class};
     }
 
     @Override
@@ -121,17 +123,24 @@ public class GameFeature extends AbstractFeature {
 
                     assignBlock(user);
 
-                    List<Player> clients = getPhase().getGame().getPlayers().stream()
-                            .filter((u) -> !u.getUuid().equals(user.getUuid()))
-                            .map(User::getPlayer)
-                            .collect(Collectors.toList());
-
-
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> sendMorphPackets(subject, subjectGamePlayer.getBlock(), clients), 40); // run later to ensure entities spawn
-                    // todo perhaps run this as clients send the packet to show that they've teleported successfully, since this makes an assumption that 40 ticks is enough
+                    //Bukkit.getScheduler().runTaskLater(plugin, () -> sendMorphPackets(subject, subjectGamePlayer.getBlock(), clients), 40); // run later to ensure entities spawn
 
                     // good luck
                     subject.sendTitle(ChatColor.GREEN + "You have 30 seconds to hide!", null);
+                }
+            });
+
+            protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
+                    PacketType.Play.Client.TELEPORT_ACCEPT) {
+                @Override
+                public void onPacketReceiving(PacketEvent event) {
+                    hiders.forEach((hider) -> {
+                        HideAndSeekPlayer subjectGamePlayer = playerMap.get(hider.getUuid());
+
+                        if(!subjectGamePlayer.isStationary()) {
+                            sendMorphPackets(hider.getPlayer(), subjectGamePlayer.getBlock(), event.getPlayer());
+                        }
+                    });
                 }
             });
 
@@ -171,13 +180,12 @@ public class GameFeature extends AbstractFeature {
             if (System.currentTimeMillis() - time > 3 * 1000) { // 3 seconds to become solid
                 HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(player.getUniqueId());
                 if (!hideAndSeekPlayer.isStationary()) {
-                    hideAndSeekPlayer.setStationaryLocation(player.getLocation());
-
-                    // todo
                     // they're ready to become a block
 
                     // send a falling entity to the player, to make them see the block but be able to move thru it
                     // to all other players, make it a solid block and destroy the falling block entity. recreate it when the player moves
+
+                    solidifyPlayer(player);
 
                     player.sendTitle(ChatColor.GREEN + "You're now a solid block!", null);
                 }
@@ -231,16 +239,54 @@ public class GameFeature extends AbstractFeature {
     }
 
     private void solidifyPlayer(Player subject) {
-        // todo
+        HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(subject.getUniqueId());
 
         // send packet to the subject to put a falling block entity on their position so they see the block
         // send packets to all other players to make it seem like a real block is there
+
+        // send to subject:
+        // create our falling block they are 'disguised' as
+        WrapperPlayServerSpawnEntity blockSpawnPacket = new WrapperPlayServerSpawnEntity();
+        int blockEntityId = NmsUtil.getNextEntityId();
+        blockSpawnPacket.setEntityID(blockEntityId);
+        blockSpawnPacket.setUniqueId(UUID.randomUUID());
+        blockSpawnPacket.setType(70);
+        blockSpawnPacket.setObjectData(hideAndSeekPlayer.getBlock().getId());
+
+        blockSpawnPacket.setX(subject.getLocation().getBlockX());
+        blockSpawnPacket.setY(subject.getLocation().getBlockY());
+        blockSpawnPacket.setZ(subject.getLocation().getBlockZ());
+        blockSpawnPacket.setPitch(0);
+        blockSpawnPacket.setYaw(0);
+
+        hideAndSeekPlayer.setStationaryLocation(subject.getLocation());
+        hideAndSeekPlayer.setFakeBlockEntityId(blockEntityId);
+        blockSpawnPacket.sendPacket(subject);
+
+        // send a fake block to everyone else and destroy the entity
+        getPhase().getGame().getPlayers().forEach((user) -> {
+            // destroy the real player, client side
+            WrapperPlayServerEntityDestroy destroyPacket = new WrapperPlayServerEntityDestroy();
+            destroyPacket.setEntityIds(new int[]{hideAndSeekPlayer.getEntityId()});
+
+            destroyPacket.sendPacket(user.getPlayer());
+            user.getPlayer().sendBlockChange(subject.getLocation(), hideAndSeekPlayer.getBlock(), (byte) 0);
+        });
     }
 
     private void setHiddenPlayerVisible(Player player) {
-        // todo make them visible again
+        HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(player.getUniqueId());
+        Location stationaryLocation = hideAndSeekPlayer.getStationaryLocation();
 
         // reverse solidifying the player
+        List<Player> clients = getPhase().getGame().getPlayers().stream()
+                .filter((u) -> !u.getUuid().equals(player.getUniqueId()))
+                .map(User::getPlayer)
+                .collect(Collectors.toList());
+
+        sendMorphPackets(player, hideAndSeekPlayer.getBlock(), clients);
+
+        hideAndSeekPlayer.setStationaryLocation(null);
     }
 
     /**

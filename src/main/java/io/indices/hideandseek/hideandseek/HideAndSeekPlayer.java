@@ -22,6 +22,14 @@ public class HideAndSeekPlayer {
     @Getter
     private Location stationaryLocation;
 
+    @Getter
+    @Setter
+    private int fakeBlockEntityId;
+
+    @Getter
+    @Setter
+    private int entityId;
+
     public void setStationaryLocation(Location location) {
         stationaryLocation = location;
 
