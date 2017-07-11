@@ -1,26 +1,29 @@
 package io.indices.hideandseek.features;
 
-import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
-import com.comphenix.packetwrapper.WrapperPlayServerMount;
-import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity;
-import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntityLiving;
+import com.comphenix.packetwrapper.*;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLib;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.ListenerPriority;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
 import io.indices.hideandseek.util.NmsUtil;
 import lombok.Setter;
 import me.minidigger.voxelgameslib.VoxelGamesLib;
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
+import me.minidigger.voxelgameslib.feature.features.MapFeature;
 import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
+import me.minidigger.voxelgameslib.feature.features.SpawnFeature;
 import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
 import me.minidigger.voxelgameslib.user.User;
 import me.minidigger.voxelgameslib.user.UserHandler;
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,6 +32,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,6 +42,7 @@ public class GameFeature extends AbstractFeature {
     private VoxelGamesLib plugin;
     @Inject
     private UserHandler userHandler;
+    private ProtocolManager protocolManager = ProtocolLibrary.getProtocolManager();
 
     @Setter
     private Scoreboard scoreboard;
@@ -60,7 +65,7 @@ public class GameFeature extends AbstractFeature {
 
     @Override
     public Class[] getDependencies() {
-        return new Class[]{ScoreboardFeature.class};
+        return new Class[]{MapFeature.class, SpawnFeature.class, ScoreboardFeature.class};
     }
 
     @Override
@@ -74,56 +79,6 @@ public class GameFeature extends AbstractFeature {
 
         // yes, unchecked cast, the getGameData thing is dum
         // todo make getGameData non-shit
-
-        if (gameStarted != null && (gameStarted instanceof Boolean)) {
-            if(!((Boolean) gameStarted)) {
-                // initialise game
-
-                // choose seekers and hiders
-                Random random = new Random();
-                int playerCount = getPhase().getGame().getPlayers().size();
-                int seekerAmount = (playerCount / 10) + 1; // one seeker per 10 players
-
-                for (int i = 0; i < seekerAmount; i++) {
-                    int n = random.nextInt(playerCount - 1);
-
-                    seekers.add(getPhase().getGame().getPlayers().get(n));
-                }
-
-                getPhase().getGame().getPlayers().forEach((user) -> {
-                    if (!seekers.contains(user)) {
-                        Player subject = user.getPlayer();
-                        HideAndSeekPlayer subjectGamePlayer = playerMap.get(subject.getUniqueId());
-                        hiders.add(user);
-
-                        assignBlock(user);
-
-                        List<Player> clients = getPhase().getGame().getPlayers().stream()
-                                .filter((u) -> !u.getUuid().equals(user.getUuid()))
-                                .map(User::getPlayer)
-                                .collect(Collectors.toList());
-
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> sendMorphPackets(subject, subjectGamePlayer.getBlock(), clients), 40); // run later to ensure entities spawn
-                        // todo perhaps run this as clients send the packet to show that they've teleported successfully, since this makes an assumption that 40 ticks is enough
-
-                        // good luck
-                        subject.sendTitle(ChatColor.GREEN + "You have 30 seconds to hide!", null);
-                    }
-                });
-
-                seekers.forEach((seeker) -> {
-                    seeker.getPlayer().teleport(seeker.getPlayer().getLocation()); // todo teleport them to a locked location, dummy code for now
-                    seeker.sendMessage(TextComponent.of("Start counting down from 30...").color(TextColor.GREEN)); // todo create lang leys
-                });
-
-                getPhase().getGame().putGameData("gameStarted", true);
-
-                // save current data for other features to use
-                getPhase().getGame().putGameData("hiders", hiders);
-                getPhase().getGame().putGameData("seekers", seekers);
-                getPhase().getGame().putGameData("playerMap", playerMap);
-            }
-        }
 
         if (hidersData != null && (hidersData instanceof List)) {
             hiders = (List<User>) hidersData;
@@ -144,7 +99,49 @@ public class GameFeature extends AbstractFeature {
             });
         }
 
-        //scoreboard.setTitle(ChatColor.AQUA + "Hide" + ChatColor.GREEN + "And" + ChatColor.YELLOW + "Seek");
+        if (gameStarted == null || !(gameStarted instanceof Boolean) || !((Boolean) gameStarted)) {
+            // initialise game
+
+            // choose seekers and hiders
+            Random random = new Random();
+            int playerCount = getPhase().getGame().getPlayers().size();
+            int seekerAmount = (playerCount / 10) + 1; // one seeker per 10 players
+
+            for (int i = 0; i < seekerAmount; i++) {
+                int n = random.nextInt(playerCount - 1);
+
+                seekers.add(getPhase().getGame().getPlayers().get(n));
+            }
+
+            getPhase().getGame().getPlayers().forEach((user) -> {
+                if (!seekers.contains(user)) {
+                    Player subject = user.getPlayer();
+                    HideAndSeekPlayer subjectGamePlayer = playerMap.get(subject.getUniqueId());
+                    hiders.add(user);
+
+                    assignBlock(user);
+
+                    List<Player> clients = getPhase().getGame().getPlayers().stream()
+                            .filter((u) -> !u.getUuid().equals(user.getUuid()))
+                            .map(User::getPlayer)
+                            .collect(Collectors.toList());
+
+
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> sendMorphPackets(subject, subjectGamePlayer.getBlock(), clients), 40); // run later to ensure entities spawn
+                    // todo perhaps run this as clients send the packet to show that they've teleported successfully, since this makes an assumption that 40 ticks is enough
+
+                    // good luck
+                    subject.sendTitle(ChatColor.GREEN + "You have 30 seconds to hide!", null);
+                }
+            });
+
+            seekers.forEach((seeker) -> {
+                seeker.getPlayer().teleport(seeker.getPlayer().getLocation()); // todo teleport them to a locked location, dummy code for now
+                seeker.sendMessage(TextComponent.of("Start counting down from 30...").color(TextColor.GREEN)); // todo create lang leys
+            });
+        }
+
+        scoreboard.setTitle(ChatColor.AQUA + "Hide" + ChatColor.GREEN + "And" + ChatColor.YELLOW + "Seek");
         // todo improve VGL api to have string keys rather than having to edit int keys constantly
         scoreboard.createAndAddLine(7, ChatColor.RESET + "");
         scoreboard.createAndAddLine(6, ChatColor.RED + ChatColor.BOLD.toString() + "Grace Period Left");
@@ -152,22 +149,13 @@ public class GameFeature extends AbstractFeature {
         scoreboard.createAndAddLine(4, ChatColor.RESET + ChatColor.RESET.toString() + "");
         scoreboard.createAndAddLine(3, ChatColor.AQUA + ChatColor.BOLD.toString() + "Players Alive");
         scoreboard.createAndAddLine(2, hiders.size() + " hiders");
-        scoreboard.createAndAddLine(1, seekers.size() + "seekers");
+        scoreboard.createAndAddLine(1, seekers.size() + " seekers");
 
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> movements.forEach((player, time) -> {
-            if (time > 3 * 1000) {
-                HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(player.getUniqueId());
-                hideAndSeekPlayer.setStationaryLocation(player.getLocation());
-
-                // todo
-                // they're ready to become a block
-
-                // send a falling entity to the player, to make them see the block but be able to move thru it
-                // to all other players, make it a solid block and destroy the falling block entity. recreate it when the player moves
-
-                player.sendTitle(ChatColor.GREEN + "You're now a solid block!", null);
-            }
-        }), 0, 5);
+        // save current data for other features to use
+        getPhase().getGame().putGameData("gameStarted", true);
+        getPhase().getGame().putGameData("hiders", hiders);
+        getPhase().getGame().putGameData("seekers", seekers);
+        getPhase().getGame().putGameData("playerMap", playerMap);
     }
 
     @Override
@@ -179,7 +167,22 @@ public class GameFeature extends AbstractFeature {
 
     @Override
     public void tick() {
+        movements.forEach((player, time) -> {
+            if (System.currentTimeMillis() - time > 3 * 1000) { // 3 seconds to become solid
+                HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(player.getUniqueId());
+                if (!hideAndSeekPlayer.isStationary()) {
+                    hideAndSeekPlayer.setStationaryLocation(player.getLocation());
 
+                    // todo
+                    // they're ready to become a block
+
+                    // send a falling entity to the player, to make them see the block but be able to move thru it
+                    // to all other players, make it a solid block and destroy the falling block entity. recreate it when the player moves
+
+                    player.sendTitle(ChatColor.GREEN + "You're now a solid block!", null);
+                }
+            }
+        });
     }
 
     @EventHandler
@@ -188,8 +191,14 @@ public class GameFeature extends AbstractFeature {
             if (getPhase().getGame().getPlayers().contains(user)) {
                 user.getPlayer().spigot().respawn();
                 if (hiders.contains(user)) {
+                    HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(user.getUuid());
+                    hideAndSeekPlayer.setStationaryLocation(null);
                     hiders.remove(user);
                     seekers.add(user); // you've joined the evil side now
+
+                    // todo might need extra params for this to work
+                    WrapperPlayServerRespawn respawnPacket = new WrapperPlayServerRespawn();
+                    respawnPacket.sendPacket(user.getPlayer());
                 }
             }
         }));
@@ -197,20 +206,22 @@ public class GameFeature extends AbstractFeature {
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if ((event.getFrom().getBlockX() != event.getTo().getBlockX() ||
-                event.getFrom().getBlockY() != event.getTo().getBlockY() ||
-                event.getFrom().getBlockZ() != event.getTo().getBlockZ())) {
+        userHandler.getUser(event.getPlayer().getUniqueId()).ifPresent((user) -> {
+            if ((event.getFrom().getBlockX() != event.getTo().getBlockX() ||
+                    event.getFrom().getBlockY() != event.getTo().getBlockY() ||
+                    event.getFrom().getBlockZ() != event.getTo().getBlockZ()) && hiders.contains(user)) {
 
-            HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(event.getPlayer().getUniqueId());
+                HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(event.getPlayer().getUniqueId());
 
-            movements.put(event.getPlayer(), System.currentTimeMillis());
+                movements.put(event.getPlayer(), System.currentTimeMillis());
 
-            if (hideAndSeekPlayer.isStationary()) {
-                hideAndSeekPlayer.setStationaryLocation(null);
+                if (hideAndSeekPlayer.isStationary()) {
+                    hideAndSeekPlayer.setStationaryLocation(null);
 
-                setHiddenPlayerVisible(hideAndSeekPlayer.getUser().getPlayer());
+                    setHiddenPlayerVisible(hideAndSeekPlayer.getUser().getPlayer());
+                }
             }
-        }
+        });
     }
 
     @EventHandler
@@ -219,8 +230,17 @@ public class GameFeature extends AbstractFeature {
         playerMap.remove(event.getPlayer().getUniqueId());
     }
 
-    public void setHiddenPlayerVisible(Player player) {
+    private void solidifyPlayer(Player subject) {
+        // todo
+
+        // send packet to the subject to put a falling block entity on their position so they see the block
+        // send packets to all other players to make it seem like a real block is there
+    }
+
+    private void setHiddenPlayerVisible(Player player) {
         // todo make them visible again
+
+        // reverse solidifying the player
     }
 
     /**
@@ -309,4 +329,21 @@ public class GameFeature extends AbstractFeature {
         blockSpawnPacket.sendPacket(client);
         mount.sendPacket(client);
     }
+
+    // for debug:
+    /*@Override
+    public AbstractFeatureCommand getCommandClass() {
+        return new GameFeatureCommands();
+    }
+
+    @Singleton
+    public class GameFeatureCommands extends AbstractFeatureCommand {
+
+        @CommandAlias("disguise")
+        @CommandPermission("%user")
+        public void disguise(User user) {
+            sendMorphPackets(user.getPlayer(), Material.BEACON, Bukkit.getOnlinePlayers().stream().filter((p) -> p.getUniqueId() != user.getUuid()).collect(Collectors.toList()));
+        }
+
+    }*/
 }

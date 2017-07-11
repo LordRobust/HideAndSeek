@@ -1,16 +1,12 @@
 package io.indices.hideandseek.features;
 
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
-import lombok.Getter;
 import lombok.Setter;
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
 import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
 import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
-import me.minidigger.voxelgameslib.scoreboard.ScoreboardLine;
-import me.minidigger.voxelgameslib.scoreboard.StringScoreboardLine;
 import me.minidigger.voxelgameslib.user.User;
 import org.apache.commons.lang.time.DurationFormatUtils;
-import org.bukkit.ChatColor;
 
 import java.util.*;
 
