@@ -2,14 +2,12 @@ package io.indices.hideandseek;
 
 import javax.annotation.Nonnull;
 
+import io.indices.hideandseek.phases.ActivePhase;
+import io.indices.hideandseek.phases.GracePhase;
 import me.minidigger.voxelgameslib.game.AbstractGame;
 import me.minidigger.voxelgameslib.game.GameDefinition;
 import me.minidigger.voxelgameslib.game.GameInfo;
-import me.minidigger.voxelgameslib.phase.phases.LobbyPhase;
-import me.minidigger.voxelgameslib.phase.phases.VotePhase;
-
-import io.indices.hideandseek.phases.HideAndSeekPhase;
-import io.indices.hideandseek.phases.HidingPhase;
+import me.minidigger.voxelgameslib.phase.phases.LobbyWithVotePhase;
 
 @GameInfo(name = "HideAndSeek", author = "aphel", version = "1.0", description = "Everyone knows hide and seek!")
 public class HideAndSeekGame extends AbstractGame {
@@ -23,13 +21,11 @@ public class HideAndSeekGame extends AbstractGame {
         setMinPlayers(2); // todo raise for production
         setMaxPlayers(2);
 
-        LobbyPhase lobbyPhase = createPhase(LobbyPhase.class);
-        VotePhase votePhase = createPhase(VotePhase.class);
-        HidingPhase hidingPhase = createPhase(HidingPhase.class);
-        HideAndSeekPhase mainPhase = createPhase(HideAndSeekPhase.class);
+        LobbyWithVotePhase lobbyPhase = createPhase(LobbyWithVotePhase.class);
+        GracePhase hidingPhase = createPhase(GracePhase.class);
+        ActivePhase mainPhase = createPhase(ActivePhase.class);
 
-        lobbyPhase.setNextPhase(votePhase);
-        votePhase.setNextPhase(hidingPhase);
+        lobbyPhase.setNextPhase(hidingPhase);
         hidingPhase.setNextPhase(mainPhase);
 
         activePhase = lobbyPhase;

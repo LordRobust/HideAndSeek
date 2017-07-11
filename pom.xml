@@ -90,7 +90,7 @@
                                     <type>${project.packaging}</type>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>../testserver/plugins</outputDirectory>
+                            <outputDirectory>../VoxelGamesLibv2/testserver/plugins</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

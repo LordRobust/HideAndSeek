@@ -1,17 +1,20 @@
 package io.indices.hideandseek.phases;
 
-import io.indices.hideandseek.features.HidingFeature;
+import io.indices.hideandseek.features.GameFeature;
+import io.indices.hideandseek.features.GraceFeature;
 import me.minidigger.voxelgameslib.GameConstants;
 import me.minidigger.voxelgameslib.feature.features.*;
 import me.minidigger.voxelgameslib.phase.TimedPhase;
 import org.bukkit.GameMode;
 
-public class HidingPhase extends TimedPhase {
+public class GracePhase extends TimedPhase {
 
     @Override
     public void init() {
-        setName("HidingPhase");
-        setTicks(30 * GameConstants.TPS); // 30 seconds
+        int ticks = 30 * GameConstants.TPS;
+
+        setName("GracePhase");
+        setTicks(ticks); // 30 seconds
         super.init();
         setAllowJoin(false);
         setAllowSpectate(true);
@@ -49,8 +52,16 @@ public class HidingPhase extends TimedPhase {
         ScoreboardFeature scoreboardFeature = getGame().createFeature(ScoreboardFeature.class, this);
         addFeature(scoreboardFeature);
 
-        HidingFeature hidingFeature = getGame().createFeature(HidingFeature.class, this);
-        hidingFeature.setScoreboard(scoreboardFeature.getScoreboard());
-        addFeature(hidingFeature);
+        // main game feature
+        GameFeature gameFeature = getGame().createFeature(GameFeature.class, this);
+        gameFeature.setScoreboard(scoreboardFeature.getScoreboard());
+        gameFeature.setTicks(ticks);
+        addFeature(gameFeature);
+
+        // game is in grace period
+        GraceFeature graceFeature = getGame().createFeature(GraceFeature.class, this);
+        graceFeature.setScoreboard(scoreboardFeature.getScoreboard());
+        graceFeature.setTicks(ticks);
+        addFeature(graceFeature);
     }
 }

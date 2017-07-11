@@ -1,17 +1,18 @@
 package io.indices.hideandseek.phases;
 
-import io.indices.hideandseek.features.HideAndSeekFeature;
+import io.indices.hideandseek.features.ActiveFeature;
+import io.indices.hideandseek.features.GameFeature;
 import me.minidigger.voxelgameslib.GameConstants;
 import me.minidigger.voxelgameslib.feature.features.*;
 import me.minidigger.voxelgameslib.phase.TimedPhase;
 import org.bukkit.GameMode;
 
-public class HideAndSeekPhase extends TimedPhase {
+public class ActivePhase extends TimedPhase {
 
     @Override
     public void init() {
-        setName("HideAndSeekPhase");
-        setTicks(1 * 60 * GameConstants.TPS); // todo set to 10 minutes
+        setName("ActivePhase");
+        setTicks(2 * 60 * GameConstants.TPS); // todo set to 10 minutes
         super.init();
         setAllowJoin(false);
         setAllowSpectate(true);
@@ -42,8 +43,12 @@ public class HideAndSeekPhase extends TimedPhase {
         addFeature(scoreboardFeature);
 
         // main game feature
-        HideAndSeekFeature hideAndSeekFeature = getGame().createFeature(HideAndSeekFeature.class, this);
-        hideAndSeekFeature.setScoreboard(scoreboardFeature.getScoreboard());
-        addFeature(hideAndSeekFeature);
+        GameFeature gameFeature = getGame().createFeature(GameFeature.class, this);
+        gameFeature.setScoreboard(scoreboardFeature.getScoreboard());
+        addFeature(gameFeature);
+
+        // game is active
+        ActiveFeature activeFeature = getGame().createFeature(ActiveFeature.class, this);
+        addFeature(activeFeature);
     }
 }
