@@ -1,14 +1,21 @@
 package io.indices.hideandseek.features;
 
-import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
-import lombok.Setter;
-import me.minidigger.voxelgameslib.feature.AbstractFeature;
-import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
-import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
-import me.minidigger.voxelgameslib.user.User;
 import org.apache.commons.lang.time.DurationFormatUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import me.minidigger.voxelgameslib.components.scoreboard.Scoreboard;
+import me.minidigger.voxelgameslib.feature.AbstractFeature;
+import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
+import me.minidigger.voxelgameslib.user.User;
+
+import io.indices.hideandseek.HideAndSeekGameData;
+import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
+import lombok.Setter;
 
 public class GraceFeature extends AbstractFeature {
 
@@ -29,22 +36,11 @@ public class GraceFeature extends AbstractFeature {
 
     @Override
     public void start() {
-        Object gameStarted = getPhase().getGame().getGameData("gameStarted");
-        Object hidersData = getPhase().getGame().getGameData("hiders");
-        Object seekersData = getPhase().getGame().getGameData("seekers");
-        Object playerMapData = getPhase().getGame().getGameData("playerMap");
+        HideAndSeekGameData gameData = getPhase().getGame().getGameData(HideAndSeekGameData.class).orElse(new HideAndSeekGameData());
 
-        if (hidersData != null && (hidersData instanceof List)) {
-            hiders = (List<User>) hidersData;
-        }
-
-        if (seekersData != null && (seekersData instanceof List)) {
-            seekers = (List<User>) seekersData;
-        }
-
-        if (playerMapData != null && (playerMapData instanceof Map)) {
-            playerMap = (Map<UUID, HideAndSeekPlayer>) playerMapData;
-        }
+        hiders = gameData.hiders;
+        seekers = gameData.seekers;
+        playerMap = gameData.playerMap;
 
         // any logic specific to the grace feature that does not relate directly to the gameplay mechanics
     }

@@ -1,31 +1,44 @@
 package io.indices.hideandseek.features;
 
-import com.comphenix.packetwrapper.*;
+import com.comphenix.packetwrapper.WrapperPlayServerEntityDestroy;
+import com.comphenix.packetwrapper.WrapperPlayServerMount;
+import com.comphenix.packetwrapper.WrapperPlayServerRespawn;
+import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntity;
+import com.comphenix.packetwrapper.WrapperPlayServerSpawnEntityLiving;
 import com.comphenix.protocol.PacketType;
-import com.comphenix.protocol.ProtocolLib;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
-import io.indices.hideandseek.util.NmsUtil;
-import lombok.Setter;
+
+import net.kyori.text.TextComponent;
+import net.kyori.text.format.TextColor;
+
+import org.apache.commons.lang.time.DurationFormatUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
+import javax.inject.Inject;
+
 import me.minidigger.voxelgameslib.VoxelGamesLib;
+import me.minidigger.voxelgameslib.components.scoreboard.Scoreboard;
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
 import me.minidigger.voxelgameslib.feature.features.MapFeature;
 import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
-import me.minidigger.voxelgameslib.feature.features.SpawnFeature;
-import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
 import me.minidigger.voxelgameslib.user.User;
 import me.minidigger.voxelgameslib.user.UserHandler;
-import net.kyori.text.TextComponent;
-import net.kyori.text.format.TextColor;
-import org.apache.commons.lang.time.DurationFormatUtils;
-import org.bukkit.*;
+
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,10 +46,10 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.*;
-import java.util.stream.Collectors;
+import io.indices.hideandseek.HideAndSeekGameData;
+import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
+import io.indices.hideandseek.util.NmsUtil;
+import lombok.Setter;
 
 public class GameFeature extends AbstractFeature {
 
@@ -74,24 +87,13 @@ public class GameFeature extends AbstractFeature {
     public void start() {
         // load any existing data from previous phase(s) also using GameFeature
 
-        Object gameStarted = getPhase().getGame().getGameData("gameStarted");
-        Object hidersData = getPhase().getGame().getGameData("hiders");
-        Object seekersData = getPhase().getGame().getGameData("seekers");
-        Object playerMapData = getPhase().getGame().getGameData("playerMap");
+        HideAndSeekGameData gameData = getPhase().getGame().getGameData(HideAndSeekGameData.class).orElse(new HideAndSeekGameData());
 
-        // yes, unchecked cast, the getGameData thing is dum
-        // todo make getGameData non-shit
+        hiders = gameData.hiders;
+        seekers = gameData.seekers;
 
-        if (hidersData != null && (hidersData instanceof List)) {
-            hiders = (List<User>) hidersData;
-        }
-
-        if (seekersData != null && (seekersData instanceof List)) {
-            seekers = (List<User>) seekersData;
-        }
-
-        if (playerMapData != null && (playerMapData instanceof Map)) {
-            playerMap = (Map<UUID, HideAndSeekPlayer>) playerMapData;
+        if (gameData.playerMap != null) {
+            playerMap = gameData.playerMap;
         } else {
             // generate default values
             getPhase().getGame().getPlayers().forEach((user) -> {
@@ -101,7 +103,7 @@ public class GameFeature extends AbstractFeature {
             });
         }
 
-        if (gameStarted == null || !(gameStarted instanceof Boolean) || !((Boolean) gameStarted)) {
+        if (!gameData.gameStarted) {
             // initialise game
 
             // choose seekers and hiders
@@ -137,7 +139,7 @@ public class GameFeature extends AbstractFeature {
                     hiders.forEach((hider) -> {
                         HideAndSeekPlayer subjectGamePlayer = playerMap.get(hider.getUuid());
 
-                        if(!subjectGamePlayer.isStationary()) {
+                        if (!subjectGamePlayer.isStationary()) {
                             sendMorphPackets(hider.getPlayer(), subjectGamePlayer.getBlock(), event.getPlayer());
                         }
                     });
@@ -161,17 +163,21 @@ public class GameFeature extends AbstractFeature {
         scoreboard.createAndAddLine(1, seekers.size() + " seekers");
 
         // save current data for other features to use
-        getPhase().getGame().putGameData("gameStarted", true);
-        getPhase().getGame().putGameData("hiders", hiders);
-        getPhase().getGame().putGameData("seekers", seekers);
-        getPhase().getGame().putGameData("playerMap", playerMap);
+        gameData.hiders = hiders;
+        gameData.seekers = seekers;
+        gameData.playerMap = playerMap;
+        gameData.gameStarted = true;
+        getPhase().getGame().putGameData(gameData);
     }
 
     @Override
     public void stop() {
-        getPhase().getGame().putGameData("hiders", hiders);
-        getPhase().getGame().putGameData("seekers", seekers);
-        getPhase().getGame().putGameData("playerMap", playerMap);
+        HideAndSeekGameData gameData = getPhase().getGame().getGameData(HideAndSeekGameData.class).orElse(new HideAndSeekGameData());
+        gameData.hiders = hiders;
+        gameData.seekers = seekers;
+        gameData.playerMap = playerMap;
+        gameData.gameStarted = true;
+        getPhase().getGame().putGameData(gameData);
     }
 
     @Override

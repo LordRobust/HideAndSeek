@@ -3,7 +3,7 @@ package io.indices.hideandseek.features;
 import lombok.Setter;
 import me.minidigger.voxelgameslib.feature.AbstractFeature;
 import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
-import me.minidigger.voxelgameslib.scoreboard.Scoreboard;
+import me.minidigger.voxelgameslib.components.scoreboard.Scoreboard;
 import net.kyori.text.TextComponent;
 import org.bukkit.ChatColor;
 
