@@ -2,4 +2,4 @@ name: HideAndSeek
 version: ${project.version}
 main: io.indices.hideandseek.HideAndSeekPlugin
 authors: [aphel]
-depends: [VoxelGamesLib]
+depend: [VoxelGamesLib]
