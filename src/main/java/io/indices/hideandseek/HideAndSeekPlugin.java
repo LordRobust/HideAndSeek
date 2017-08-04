@@ -1,13 +1,13 @@
 package io.indices.hideandseek;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.voxelgameslib.voxelgameslib.game.GameHandler;
 import com.voxelgameslib.voxelgameslib.game.GameMode;
 import com.voxelgameslib.voxelgameslib.module.Module;
 import com.voxelgameslib.voxelgameslib.module.ModuleHandler;
 import com.voxelgameslib.voxelgameslib.module.ModuleInfo;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.bukkit.plugin.java.JavaPlugin;
 

@@ -1,11 +1,19 @@
 package io.indices.hideandseek.phases;
 
+import com.voxelgameslib.voxelgameslib.GameConstants;
+import com.voxelgameslib.voxelgameslib.feature.features.ClearInventoryFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.GameModeFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.HealFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.MapFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.NoHungerLossFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.SpawnFeature;
+import com.voxelgameslib.voxelgameslib.phase.TimedPhase;
+
+import org.bukkit.GameMode;
+
 import io.indices.hideandseek.features.ActiveFeature;
 import io.indices.hideandseek.features.GameFeature;
-import com.voxelgameslib.voxelgameslib.GameConstants;
-import com.voxelgameslib.voxelgameslib.feature.features.*;
-import com.voxelgameslib.voxelgameslib.phase.TimedPhase;
-import org.bukkit.GameMode;
 
 public class ActivePhase extends TimedPhase {
 

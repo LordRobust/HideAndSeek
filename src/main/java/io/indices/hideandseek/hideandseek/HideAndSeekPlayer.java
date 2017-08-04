@@ -1,10 +1,12 @@
 package io.indices.hideandseek.hideandseek;
 
-import lombok.Getter;
-import lombok.Setter;
 import com.voxelgameslib.voxelgameslib.user.User;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
+
+import lombok.Getter;
+import lombok.Setter;
 
 public class HideAndSeekPlayer {
     @Getter
@@ -33,7 +35,7 @@ public class HideAndSeekPlayer {
     public void setStationaryLocation(Location location) {
         stationaryLocation = location;
 
-        if(location == null) {
+        if (location == null) {
             isStationary = false;
         } else {
             isStationary = true;

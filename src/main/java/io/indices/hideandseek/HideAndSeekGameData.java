@@ -10,7 +10,7 @@ import com.voxelgameslib.voxelgameslib.user.User;
 
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
 
-public class HideAndSeekGameData implements GameData{
+public class HideAndSeekGameData implements GameData {
 
     public boolean gameStarted = false;
     public List<User> hiders = new ArrayList<>();

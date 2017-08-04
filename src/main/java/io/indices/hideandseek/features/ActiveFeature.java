@@ -1,11 +1,14 @@
 package io.indices.hideandseek.features;
 
-import lombok.Setter;
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
 import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
 import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
-import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+
 import net.kyori.text.TextComponent;
+
 import org.bukkit.ChatColor;
+
+import lombok.Setter;
 
 public class ActiveFeature extends AbstractFeature {
 

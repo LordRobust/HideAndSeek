@@ -1,5 +1,10 @@
 package io.indices.hideandseek.features;
 
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
+import com.voxelgameslib.voxelgameslib.user.User;
+
 import org.apache.commons.lang.time.DurationFormatUtils;
 
 import java.util.ArrayList;
@@ -7,11 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
-import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
-import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
-import com.voxelgameslib.voxelgameslib.user.User;
 
 import io.indices.hideandseek.HideAndSeekGameData;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
