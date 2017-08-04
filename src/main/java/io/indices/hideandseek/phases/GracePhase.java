@@ -2,9 +2,9 @@ package io.indices.hideandseek.phases;
 
 import io.indices.hideandseek.features.GameFeature;
 import io.indices.hideandseek.features.GraceFeature;
-import me.minidigger.voxelgameslib.GameConstants;
-import me.minidigger.voxelgameslib.feature.features.*;
-import me.minidigger.voxelgameslib.phase.TimedPhase;
+import com.voxelgameslib.voxelgameslib.GameConstants;
+import com.voxelgameslib.voxelgameslib.feature.features.*;
+import com.voxelgameslib.voxelgameslib.phase.TimedPhase;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 

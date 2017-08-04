@@ -28,13 +28,13 @@ import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
-import me.minidigger.voxelgameslib.VoxelGamesLib;
-import me.minidigger.voxelgameslib.components.scoreboard.Scoreboard;
-import me.minidigger.voxelgameslib.feature.AbstractFeature;
-import me.minidigger.voxelgameslib.feature.features.MapFeature;
-import me.minidigger.voxelgameslib.feature.features.ScoreboardFeature;
-import me.minidigger.voxelgameslib.user.User;
-import me.minidigger.voxelgameslib.user.UserHandler;
+import com.voxelgameslib.voxelgameslib.VoxelGamesLib;
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.MapFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
+import com.voxelgameslib.voxelgameslib.user.User;
+import com.voxelgameslib.voxelgameslib.user.UserHandler;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;

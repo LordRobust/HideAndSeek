@@ -4,10 +4,10 @@ import javax.annotation.Nonnull;
 
 import io.indices.hideandseek.phases.ActivePhase;
 import io.indices.hideandseek.phases.GracePhase;
-import me.minidigger.voxelgameslib.game.AbstractGame;
-import me.minidigger.voxelgameslib.game.GameDefinition;
-import me.minidigger.voxelgameslib.game.GameInfo;
-import me.minidigger.voxelgameslib.phase.phases.LobbyWithVotePhase;
+import com.voxelgameslib.voxelgameslib.game.AbstractGame;
+import com.voxelgameslib.voxelgameslib.game.GameDefinition;
+import com.voxelgameslib.voxelgameslib.game.GameInfo;
+import com.voxelgameslib.voxelgameslib.phase.phases.LobbyWithVotePhase;
 
 @GameInfo(name = "HideAndSeek", author = "aphel", version = "1.0", description = "Everyone knows hide and seek!")
 public class HideAndSeekGame extends AbstractGame {

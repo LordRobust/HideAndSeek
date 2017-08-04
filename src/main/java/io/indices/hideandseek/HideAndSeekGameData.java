@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import me.minidigger.voxelgameslib.game.GameData;
-import me.minidigger.voxelgameslib.user.User;
+import com.voxelgameslib.voxelgameslib.game.GameData;
+import com.voxelgameslib.voxelgameslib.user.User;
 
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
 

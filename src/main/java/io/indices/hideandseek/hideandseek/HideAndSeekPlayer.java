@@ -2,7 +2,7 @@ package io.indices.hideandseek.hideandseek;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.minidigger.voxelgameslib.user.User;
+import com.voxelgameslib.voxelgameslib.user.User;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
