@@ -12,10 +12,6 @@ version '1.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-ext {
-    dev = true
-}
-
 defaultTasks 'clean', 'build'
 
 repositories {
@@ -50,62 +46,62 @@ compileJava {
 }
 
 
-if (dev) {
-    task copyToServer(dependsOn: 'jar', type: Copy) {
-        from 'build/libs/hideandseek-1.0-SNAPSHOT.jar'
-        into '../testserver/plugins/'
-    }
-} else {
-    task javadocJar(type: Jar) {
-        classifier 'javadoc'
-        javadoc.failOnError = false
-        from javadoc
-    }
+task copyToServer(dependsOn: 'jar', type: Copy) {
+    from 'build/libs/hideandseek-1.0-SNAPSHOT.jar'
+    into '../testserver/plugins/'
+}
 
-    task sourcesJar(type: Jar) {
-        classifier 'sources'
-        from sourceSets.main.allSource
-    }
+task javadocJar(type: Jar) {
+    classifier 'javadoc'
+    javadoc.failOnError = false
+    from javadoc
+}
 
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+if (!project.hasProperty("dev")) {
     artifacts {
         archives javadocJar
         archives sourcesJar
     }
+}
 
-    signing {
-        required {
-            !project.version.endsWith('-SNAPSHOT') && gradle.taskGraph.hasTask('uploadArchives')
-        }
-        sign configurations.archives
+signing {
+    required {
+        !project.version.endsWith('-SNAPSHOT') && gradle.taskGraph.hasTask('uploadArchives')
     }
+    sign configurations.archives
+}
 
-    if (project.hasProperty('indicesUsername') && project.hasProperty('indicesPassword')) {
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+if (project.hasProperty('indicesUsername') && project.hasProperty('indicesPassword')) {
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
-                    repository(url: 'https://nexus.indices.io/content/repositories/releases/') {
-                        authentication(userName: indicesUsername, password: indicesPassword)
+                repository(url: 'https://nexus.indices.io/content/repositories/releases/') {
+                    authentication(userName: indicesUsername, password: indicesPassword)
+                }
+
+                snapshotRepository(url: 'https://nexus.indices.io/content/repositories/snapshots/') {
+                    authentication(userName: indicesUsername, password: indicesPassword)
+                }
+
+                pom.project {
+                    name project.name
+
+                    issueManagement {
+                        system 'GitHub Issues'
+                        url 'https://github.com/LordRobust/hideandseek/issues'
                     }
 
-                    snapshotRepository(url: 'https://nexus.indices.io/content/repositories/snapshots/') {
-                        authentication(userName: indicesUsername, password: indicesPassword)
-                    }
-
-                    pom.project {
-                        name project.name
-
-                        issueManagement {
-                            system 'GitHub Issues'
-                            url 'https://github.com/LordRobust/hideandseek/issues'
-                        }
-
-                        scm {
-                            connection 'scm:git@github.com:LordRobust/hideandseek.git'
-                            developerConnection 'scm:git@github.com:LordRobust/hideandseek.git'
-                            url 'https://github.com/LordRobust/hideandseek/'
-                        }
+                    scm {
+                        connection 'scm:git@github.com:LordRobust/hideandseek.git'
+                        developerConnection 'scm:git@github.com:LordRobust/hideandseek.git'
+                        url 'https://github.com/LordRobust/hideandseek/'
                     }
                 }
             }
