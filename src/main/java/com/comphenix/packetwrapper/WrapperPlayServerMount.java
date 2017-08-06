@@ -15,17 +15,18 @@
  */
 package com.comphenix.packetwrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nonnull;
+
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
 
 public class WrapperPlayServerMount extends AbstractPacket {
 
@@ -36,14 +37,12 @@ public class WrapperPlayServerMount extends AbstractPacket {
         handle.getModifier().writeDefaults();
     }
 
-    public WrapperPlayServerMount(PacketContainer packet) {
+    public WrapperPlayServerMount(@Nonnull PacketContainer packet) {
         super(packet, TYPE);
     }
 
     /**
-     * Retrieve Entity ID.
-     * <p>
-     * Notes: vehicle's EID
+     * Retrieve Entity ID. <p> Notes: vehicle's EID
      *
      * @return The current Entity ID
      */
@@ -57,7 +56,8 @@ public class WrapperPlayServerMount extends AbstractPacket {
      * @param world - the current world of the entity.
      * @return The involved entity.
      */
-    public Entity getEntity(World world) {
+    @Nonnull
+    public Entity getEntity(@Nonnull World world) {
         return handle.getEntityModifier(world).read(0);
     }
 
@@ -67,7 +67,8 @@ public class WrapperPlayServerMount extends AbstractPacket {
      * @param event - the packet event.
      * @return The involved entity.
      */
-    public Entity getEntity(PacketEvent event) {
+    @Nonnull
+    public Entity getEntity(@Nonnull PacketEvent event) {
         return getEntity(event.getPlayer().getWorld());
     }
 
@@ -80,19 +81,22 @@ public class WrapperPlayServerMount extends AbstractPacket {
         handle.getIntegers().write(0, value);
     }
 
+    @Nonnull
     public int[] getPassengerIds() {
         return handle.getIntegerArrays().read(0);
     }
 
-    public void setPassengerIds(int[] value) {
+    public void setPassengerIds(@Nonnull int[] value) {
         handle.getIntegerArrays().write(0, value);
     }
 
-    public List<Entity> getPassengers(PacketEvent event) {
+    @Nonnull
+    public List<Entity> getPassengers(@Nonnull PacketEvent event) {
         return getPassengers(event.getPlayer().getWorld());
     }
 
-    public List<Entity> getPassengers(World world) {
+    @Nonnull
+    public List<Entity> getPassengers(@Nonnull World world) {
         int[] ids = getPassengerIds();
         List<Entity> passengers = new ArrayList<>();
         ProtocolManager manager = ProtocolLibrary.getProtocolManager();
@@ -107,7 +111,7 @@ public class WrapperPlayServerMount extends AbstractPacket {
         return passengers;
     }
 
-    public void setPassengers(List<Entity> value) {
+    public void setPassengers(@Nonnull List<Entity> value) {
         int[] array = new int[value.size()];
         for (int i = 0; i < value.size(); i++) {
             array[i] = value.get(i).getEntityId();

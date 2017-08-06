@@ -18,6 +18,8 @@ package com.comphenix.packetwrapper;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 
+import javax.annotation.Nonnull;
+
 public class WrapperPlayServerEntityDestroy extends AbstractPacket {
     public static final PacketType TYPE = PacketType.Play.Server.ENTITY_DESTROY;
 
@@ -26,7 +28,7 @@ public class WrapperPlayServerEntityDestroy extends AbstractPacket {
         handle.getModifier().writeDefaults();
     }
 
-    public WrapperPlayServerEntityDestroy(PacketContainer packet) {
+    public WrapperPlayServerEntityDestroy(@Nonnull PacketContainer packet) {
         super(packet, TYPE);
     }
 
@@ -48,6 +50,7 @@ public class WrapperPlayServerEntityDestroy extends AbstractPacket {
      *
      * @return The current Entity IDs
      */
+    @Nonnull
     public int[] getEntityIDs() {
         return handle.getIntegerArrays().read(0);
     }
@@ -57,7 +60,7 @@ public class WrapperPlayServerEntityDestroy extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setEntityIds(int[] value) {
+    public void setEntityIds(@Nonnull int[] value) {
         handle.getIntegerArrays().write(0, value);
     }
 

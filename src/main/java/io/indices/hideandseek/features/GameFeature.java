@@ -33,6 +33,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
 import org.bukkit.ChatColor;
@@ -78,6 +79,7 @@ public class GameFeature extends AbstractFeature {
     }
 
     @Override
+    @Nonnull
     public Class[] getDependencies() {
         return new Class[]{MapFeature.class, ScoreboardFeature.class};
     }
@@ -134,7 +136,7 @@ public class GameFeature extends AbstractFeature {
             protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
                     PacketType.Play.Client.TELEPORT_ACCEPT) {
                 @Override
-                public void onPacketReceiving(PacketEvent event) {
+                public void onPacketReceiving(@Nonnull PacketEvent event) {
                     hiders.forEach((hider) -> {
                         HideAndSeekPlayer subjectGamePlayer = playerMap.get(hider.getUuid());
 
@@ -199,7 +201,7 @@ public class GameFeature extends AbstractFeature {
     }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
+    public void onDeath(@Nonnull PlayerDeathEvent event) {
         userHandler.getUser(event.getEntity().getUniqueId()).ifPresent((user -> {
             if (getPhase().getGame().getPlayers().contains(user)) {
                 user.getPlayer().spigot().respawn();
@@ -218,7 +220,7 @@ public class GameFeature extends AbstractFeature {
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent event) {
+    public void onMove(@Nonnull PlayerMoveEvent event) {
         userHandler.getUser(event.getPlayer().getUniqueId()).ifPresent((user) -> {
             if ((event.getFrom().getBlockX() != event.getTo().getBlockX() ||
                     event.getFrom().getBlockY() != event.getTo().getBlockY() ||
@@ -238,12 +240,12 @@ public class GameFeature extends AbstractFeature {
     }
 
     @EventHandler
-    public void onQuit(PlayerQuitEvent event) {
+    public void onQuit(@Nonnull PlayerQuitEvent event) {
         // wont need that data anymore
         playerMap.remove(event.getPlayer().getUniqueId());
     }
 
-    private void solidifyPlayer(Player subject) {
+    private void solidifyPlayer(@Nonnull Player subject) {
         HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(subject.getUniqueId());
 
         // send packet to the subject to put a falling block entity on their position so they see the block
@@ -279,7 +281,7 @@ public class GameFeature extends AbstractFeature {
         });
     }
 
-    private void setHiddenPlayerVisible(Player player) {
+    private void setHiddenPlayerVisible(@Nonnull Player player) {
         HideAndSeekPlayer hideAndSeekPlayer = playerMap.get(player.getUniqueId());
         Location stationaryLocation = hideAndSeekPlayer.getStationaryLocation();
 
@@ -299,7 +301,7 @@ public class GameFeature extends AbstractFeature {
      *
      * @param user the user
      */
-    private void assignBlock(User user) {
+    private void assignBlock(@Nonnull User user) {
         if (nextBlock > (transformableBlocks.length - 1)) {
             nextBlock = 0;
         }
@@ -315,7 +317,7 @@ public class GameFeature extends AbstractFeature {
      *
      * @param clients list of players to send packets to
      */
-    public void sendMorphPackets(Player subject, Material block, List<Player> clients) {
+    public void sendMorphPackets(@Nonnull Player subject, @Nonnull Material block, @Nonnull List<Player> clients) {
         clients.forEach((client) -> sendMorphPackets(subject, block, client));
     }
 
@@ -324,7 +326,7 @@ public class GameFeature extends AbstractFeature {
      *
      * @param client player to send packets to
      */
-    public void sendMorphPackets(Player subject, Material block, Player client) {
+    public void sendMorphPackets(@Nonnull Player subject, @Nonnull Material block, @Nonnull Player client) {
         int playerEntityId = subject.getEntityId();
 
         // i would rather use NMS, but i was convinced to use protocollib

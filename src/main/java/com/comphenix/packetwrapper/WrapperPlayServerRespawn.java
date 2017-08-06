@@ -15,12 +15,14 @@
  */
 package com.comphenix.packetwrapper;
 
-import org.bukkit.WorldType;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.EnumWrappers.Difficulty;
 import com.comphenix.protocol.wrappers.EnumWrappers.NativeGameMode;
+
+import javax.annotation.Nonnull;
+
+import org.bukkit.WorldType;
 
 public class WrapperPlayServerRespawn extends AbstractPacket {
     public static final PacketType TYPE = PacketType.Play.Server.RESPAWN;
@@ -30,7 +32,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
         handle.getModifier().writeDefaults();
     }
 
-    public WrapperPlayServerRespawn(PacketContainer packet) {
+    public WrapperPlayServerRespawn(@Nonnull PacketContainer packet) {
         super(packet, TYPE);
     }
 
@@ -61,6 +63,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @return The current Difficulty
      */
+    @Nonnull
     public Difficulty getDifficulty() {
         return handle.getDifficulties().read(0);
     }
@@ -70,7 +73,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setDifficulty(Difficulty value) {
+    public void setDifficulty(@Nonnull Difficulty value) {
         handle.getDifficulties().write(0, value);
     }
 
@@ -82,6 +85,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @return The current Gamemode
      */
+    @Nonnull
     public NativeGameMode getGamemode() {
         return handle.getGameModes().read(0);
     }
@@ -91,7 +95,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setGamemode(NativeGameMode value) {
+    public void setGamemode(@Nonnull NativeGameMode value) {
         handle.getGameModes().write(0, value);
     }
 
@@ -102,6 +106,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @return The current Level Type
      */
+    @Nonnull
     public WorldType getLevelType() {
         return handle.getWorldTypeModifier().read(0);
     }
@@ -111,7 +116,7 @@ public class WrapperPlayServerRespawn extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setLevelType(WorldType value) {
+    public void setLevelType(@Nonnull WorldType value) {
         handle.getWorldTypeModifier().write(0, value);
     }
 

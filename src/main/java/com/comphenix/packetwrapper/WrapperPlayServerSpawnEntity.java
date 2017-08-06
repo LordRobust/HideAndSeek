@@ -15,11 +15,6 @@
  */
 package com.comphenix.packetwrapper;
 
-import java.util.UUID;
-
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
@@ -27,10 +22,90 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.PacketConstructor;
 import com.comphenix.protocol.reflect.IntEnum;
 
+import java.util.UUID;
+import javax.annotation.Nonnull;
+
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+
 public class WrapperPlayServerSpawnEntity extends AbstractPacket {
     public static final PacketType TYPE = PacketType.Play.Server.SPAWN_ENTITY;
 
     private static PacketConstructor entityConstructor;
+
+    public WrapperPlayServerSpawnEntity(@Nonnull PacketContainer packet) {
+        super(packet, TYPE);
+    }
+
+    public WrapperPlayServerSpawnEntity() {
+        super(new PacketContainer(TYPE), TYPE);
+        handle.getModifier().writeDefaults();
+    }
+
+    public WrapperPlayServerSpawnEntity(@Nonnull Entity entity, int type, int objectData) {
+        super(fromEntity(entity, type, objectData), TYPE);
+    }
+
+    // Useful constructor
+    @Nonnull
+    private static PacketContainer fromEntity(@Nonnull Entity entity, int type,
+                                              int objectData) {
+        if (entityConstructor == null)
+            entityConstructor =
+                    ProtocolLibrary.getProtocolManager()
+                            .createPacketConstructor(TYPE, entity, type,
+                                    objectData);
+        return entityConstructor.createPacket(entity, type, objectData);
+    }
+
+    /**
+     * Retrieve the entity that will be spawned.
+     *
+     * @param world - the current world of the entity.
+     * @return The spawned entity.
+     */
+    @Nonnull
+    public Entity getEntity(@Nonnull World world) {
+        return handle.getEntityModifier(world).read(0);
+    }
+
+    /**
+     * Retrieve entity ID of the Object.
+     *
+     * @return The current EID
+     */
+    public int getEntityID() {
+        return handle.getIntegers().read(0);
+    }
+
+    /**
+     * Retrieve the entity that will be spawned.
+     *
+     * @param event - the packet event.
+     * @return The spawned entity.
+     */
+    @Nonnull
+    public Entity getEntity(@Nonnull PacketEvent event) {
+        return getEntity(event.getPlayer().getWorld());
+    }
+
+    @Nonnull
+    public UUID getUniqueId() {
+        return handle.getUUIDs().read(0);
+    }
+
+    /**
+     * Set entity ID of the Object.
+     *
+     * @param value - new value.
+     */
+    public void setEntityID(int value) {
+        handle.getIntegers().write(0, value);
+    }
+
+    public void setUniqueId(@Nonnull UUID value) {
+        handle.getUUIDs().write(0, value);
+    }
 
     /**
      * Represents the different object types.
@@ -74,79 +149,10 @@ public class WrapperPlayServerSpawnEntity extends AbstractPacket {
          *
          * @return Object type enum.
          */
+        @Nonnull
         public static ObjectTypes getInstance() {
             return INSTANCE;
         }
-    }
-
-    public WrapperPlayServerSpawnEntity() {
-        super(new PacketContainer(TYPE), TYPE);
-        handle.getModifier().writeDefaults();
-    }
-
-    public WrapperPlayServerSpawnEntity(PacketContainer packet) {
-        super(packet, TYPE);
-    }
-
-    public WrapperPlayServerSpawnEntity(Entity entity, int type, int objectData) {
-        super(fromEntity(entity, type, objectData), TYPE);
-    }
-
-    // Useful constructor
-    private static PacketContainer fromEntity(Entity entity, int type,
-                                              int objectData) {
-        if (entityConstructor == null)
-            entityConstructor =
-                    ProtocolLibrary.getProtocolManager()
-                            .createPacketConstructor(TYPE, entity, type,
-                                    objectData);
-        return entityConstructor.createPacket(entity, type, objectData);
-    }
-
-    /**
-     * Retrieve entity ID of the Object.
-     *
-     * @return The current EID
-     */
-    public int getEntityID() {
-        return handle.getIntegers().read(0);
-    }
-
-    /**
-     * Retrieve the entity that will be spawned.
-     *
-     * @param world - the current world of the entity.
-     * @return The spawned entity.
-     */
-    public Entity getEntity(World world) {
-        return handle.getEntityModifier(world).read(0);
-    }
-
-    /**
-     * Retrieve the entity that will be spawned.
-     *
-     * @param event - the packet event.
-     * @return The spawned entity.
-     */
-    public Entity getEntity(PacketEvent event) {
-        return getEntity(event.getPlayer().getWorld());
-    }
-
-    /**
-     * Set entity ID of the Object.
-     *
-     * @param value - new value.
-     */
-    public void setEntityID(int value) {
-        handle.getIntegers().write(0, value);
-    }
-
-    public UUID getUniqueId() {
-        return handle.getUUIDs().read(0);
-    }
-
-    public void setUniqueId(UUID value) {
-        handle.getUUIDs().write(0, value);
     }
 
     /**

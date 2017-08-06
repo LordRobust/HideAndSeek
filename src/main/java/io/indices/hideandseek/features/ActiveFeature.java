@@ -6,6 +6,8 @@ import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
 
 import net.kyori.text.TextComponent;
 
+import javax.annotation.Nonnull;
+
 import org.bukkit.ChatColor;
 
 import lombok.Setter;
@@ -36,6 +38,7 @@ public class ActiveFeature extends AbstractFeature {
     }
 
     @Override
+    @Nonnull
     public Class[] getDependencies() {
         return new Class[]{GameFeature.class, ScoreboardFeature.class};
     }

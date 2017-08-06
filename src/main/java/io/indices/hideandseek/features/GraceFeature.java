@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 
 import io.indices.hideandseek.HideAndSeekGameData;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
@@ -61,6 +62,7 @@ public class GraceFeature extends AbstractFeature {
     }
 
     @Override
+    @Nonnull
     public Class[] getDependencies() {
         return new Class[]{GameFeature.class, ScoreboardFeature.class};
     }

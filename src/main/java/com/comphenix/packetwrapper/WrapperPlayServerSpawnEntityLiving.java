@@ -15,18 +15,19 @@
  */
 package com.comphenix.packetwrapper;
 
-import java.util.UUID;
-
-import org.bukkit.World;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.PacketConstructor;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
+
+import java.util.UUID;
+import javax.annotation.Nonnull;
+
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 
 public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
     public static final PacketType TYPE =
@@ -39,16 +40,17 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
         handle.getModifier().writeDefaults();
     }
 
-    public WrapperPlayServerSpawnEntityLiving(PacketContainer packet) {
+    public WrapperPlayServerSpawnEntityLiving(@Nonnull PacketContainer packet) {
         super(packet, TYPE);
     }
 
-    public WrapperPlayServerSpawnEntityLiving(Entity entity) {
+    public WrapperPlayServerSpawnEntityLiving(@Nonnull Entity entity) {
         super(fromEntity(entity), TYPE);
     }
 
     // Useful constructor
-    private static PacketContainer fromEntity(Entity entity) {
+    @Nonnull
+    private static PacketContainer fromEntity(@Nonnull Entity entity) {
         if (entityConstructor == null)
             entityConstructor =
                     ProtocolLibrary.getProtocolManager()
@@ -71,7 +73,8 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      * @param world - the current world of the entity.
      * @return The spawned entity.
      */
-    public Entity getEntity(World world) {
+    @Nonnull
+    public Entity getEntity(@Nonnull World world) {
         return handle.getEntityModifier(world).read(0);
     }
 
@@ -81,15 +84,17 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      * @param event - the packet event.
      * @return The spawned entity.
      */
-    public Entity getEntity(PacketEvent event) {
+    @Nonnull
+    public Entity getEntity(@Nonnull PacketEvent event) {
         return getEntity(event.getPlayer().getWorld());
     }
 
+    @Nonnull
     public UUID getUniqueId() {
         return handle.getUUIDs().read(0);
     }
 
-    public void setUniqueId(UUID value) {
+    public void setUniqueId(@Nonnull UUID value) {
         handle.getUUIDs().write(0, value);
     }
 
@@ -108,6 +113,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      * @return The current Type
      */
     @SuppressWarnings("deprecation")
+    @Nonnull
     public EntityType getType() {
         return EntityType.fromId(handle.getIntegers().read(1));
     }
@@ -118,7 +124,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      * @param value - new value.
      */
     @SuppressWarnings("deprecation")
-    public void setType(EntityType value) {
+    public void setType(@Nonnull EntityType value) {
         handle.getIntegers().write(1, (int) value.getTypeId());
     }
 
@@ -297,6 +303,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      *
      * @return The current Metadata
      */
+    @Nonnull
     public WrappedDataWatcher getMetadata() {
         return handle.getDataWatcherModifier().read(0);
     }
@@ -306,7 +313,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
      *
      * @param value - new value.
      */
-    public void setMetadata(WrappedDataWatcher value) {
+    public void setMetadata(@Nonnull WrappedDataWatcher value) {
         handle.getDataWatcherModifier().write(0, value);
     }
 }
