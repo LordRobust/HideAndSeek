@@ -31,11 +31,6 @@ public class GraceFeature extends AbstractFeature {
     private Map<UUID, HideAndSeekPlayer> playerMap = new HashMap<>();
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
     public void start() {
         HideAndSeekGameData gameData = getPhase().getGame().getGameData(HideAndSeekGameData.class).orElse(new HideAndSeekGameData());
 
@@ -44,11 +39,6 @@ public class GraceFeature extends AbstractFeature {
         playerMap = gameData.playerMap;
 
         // any logic specific to the grace feature that does not relate directly to the gameplay mechanics
-    }
-
-    @Override
-    public void stop() {
-
     }
 
     @Override

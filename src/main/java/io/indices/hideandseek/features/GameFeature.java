@@ -74,11 +74,6 @@ public class GameFeature extends AbstractFeature {
     private int nextBlock = 0;
 
     @Override
-    public void init() {
-
-    }
-
-    @Override
     @Nonnull
     public Class[] getDependencies() {
         return new Class[]{MapFeature.class, ScoreboardFeature.class};
