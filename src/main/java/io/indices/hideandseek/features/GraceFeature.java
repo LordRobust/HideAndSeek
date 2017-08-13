@@ -1,10 +1,5 @@
 package io.indices.hideandseek.features;
 
-import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
-import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
-import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
-import com.voxelgameslib.voxelgameslib.user.User;
-
 import org.apache.commons.lang.time.DurationFormatUtils;
 
 import java.util.ArrayList;
@@ -14,9 +9,15 @@ import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
+import com.voxelgameslib.voxelgameslib.user.User;
+
+import lombok.Setter;
+
 import io.indices.hideandseek.HideAndSeekGameData;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
-import lombok.Setter;
 
 public class GraceFeature extends AbstractFeature {
 

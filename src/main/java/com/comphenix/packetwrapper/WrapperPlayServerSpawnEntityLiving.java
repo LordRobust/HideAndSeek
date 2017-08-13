@@ -1,17 +1,17 @@
 /**
- * PacketWrapper - ProtocolLib wrappers for Minecraft packets Copyright (C) dmulloy2
- * <http://dmulloy2.net> Copyright (C) Kristian S. Strangeland
+ * PacketWrapper - ProtocolLib wrappers for Minecraft packets Copyright (C) dmulloy2 <http://dmulloy2.net> Copyright (C)
+ * Kristian S. Strangeland
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU General Public License along with this program.  If
- * not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package com.comphenix.packetwrapper;
 
@@ -30,6 +30,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
+
     public static final PacketType TYPE =
             PacketType.Play.Server.SPAWN_ENTITY_LIVING;
 
@@ -129,9 +130,8 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
     }
 
     /**
-     * Retrieve the x position of the object.
-     * <p>
-     * Note that the coordinate is rounded off to the nearest 1/32 of a meter.
+     * Retrieve the x position of the object. <p> Note that the coordinate is rounded off to the nearest 1/32 of a
+     * meter.
      *
      * @return The current X
      */
@@ -149,9 +149,8 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
     }
 
     /**
-     * Retrieve the y position of the object.
-     * <p>
-     * Note that the coordinate is rounded off to the nearest 1/32 of a meter.
+     * Retrieve the y position of the object. <p> Note that the coordinate is rounded off to the nearest 1/32 of a
+     * meter.
      *
      * @return The current y
      */
@@ -169,9 +168,8 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
     }
 
     /**
-     * Retrieve the z position of the object.
-     * <p>
-     * Note that the coordinate is rounded off to the nearest 1/32 of a meter.
+     * Retrieve the z position of the object. <p> Note that the coordinate is rounded off to the nearest 1/32 of a
+     * meter.
      *
      * @return The current z
      */
@@ -297,9 +295,7 @@ public class WrapperPlayServerSpawnEntityLiving extends AbstractPacket {
     }
 
     /**
-     * Retrieve the data watcher.
-     * <p>
-     * Content varies by mob, see Entities.
+     * Retrieve the data watcher. <p> Content varies by mob, see Entities.
      *
      * @return The current Metadata
      */

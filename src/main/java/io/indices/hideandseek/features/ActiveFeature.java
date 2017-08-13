@@ -1,12 +1,12 @@
 package io.indices.hideandseek.features;
 
-import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
-import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
-import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
-
 import net.kyori.text.TextComponent;
 
 import javax.annotation.Nonnull;
+
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
 
 import org.bukkit.ChatColor;
 

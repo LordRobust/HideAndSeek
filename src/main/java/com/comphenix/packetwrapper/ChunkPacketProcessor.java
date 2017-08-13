@@ -1,17 +1,17 @@
 /**
- * PacketWrapper - ProtocolLib wrappers for Minecraft packets Copyright (C) dmulloy2
- * <http://dmulloy2.net> Copyright (C) Kristian S. Strangeland
+ * PacketWrapper - ProtocolLib wrappers for Minecraft packets Copyright (C) dmulloy2 <http://dmulloy2.net> Copyright (C)
+ * Kristian S. Strangeland
  *
- * This program is free software: you can redistribute it and/or modify it under the terms of the
- * GNU General Public License as published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
  *
- * You should have received a copy of the GNU General Public License along with this program.  If
- * not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 package com.comphenix.packetwrapper;
 
@@ -31,12 +31,14 @@ import org.bukkit.World.Environment;
  * @author Kristian
  */
 public class ChunkPacketProcessor {
+
     /**
      * Contains the offset of the different block data in a chunk packet.
      *
      * @author Kristian
      */
     public static class ChunkOffsets {
+
         private int blockIdOffset;
         private int dataOffset;
         private int lightOffset;
@@ -69,10 +71,8 @@ public class ChunkPacketProcessor {
         }
 
         /**
-         * Retrieve the starting index of the block ID data.
-         * <p>
-         * This will be 4096 bytes in lenght, one byte for each block in the
-         * 16x16x16 chunklet.
+         * Retrieve the starting index of the block ID data. <p> This will be 4096 bytes in lenght, one byte for each
+         * block in the 16x16x16 chunklet.
          *
          * @return The starting location of the block ID data.
          */
@@ -81,10 +81,8 @@ public class ChunkPacketProcessor {
         }
 
         /**
-         * Retrieve the starting index of the meta data (4 bit per block).
-         * <p>
-         * This will be 2048 bytes in lenght, one nibblet for each block in the
-         * 16x16x16 chunklet.
+         * Retrieve the starting index of the meta data (4 bit per block). <p> This will be 2048 bytes in lenght, one
+         * nibblet for each block in the 16x16x16 chunklet.
          *
          * @return The starting location of the block meta data.
          */
@@ -93,11 +91,8 @@ public class ChunkPacketProcessor {
         }
 
         /**
-         * Retrieve the starting index of the torch light data (4 bit per
-         * block).
-         * <p>
-         * This will be 2048 bytes in lenght, one nibblet for each block in the
-         * 16x16x16 chunklet.
+         * Retrieve the starting index of the torch light data (4 bit per block). <p> This will be 2048 bytes in lenght,
+         * one nibblet for each block in the 16x16x16 chunklet.
          *
          * @return The starting location of the torch light data.
          */
@@ -106,10 +101,8 @@ public class ChunkPacketProcessor {
         }
 
         /**
-         * Retrieve the starting index of the skylight data (4 bit per block).
-         * <p>
-         * This will be 2048 bytes in lenght if the skylight data exists (see
-         * {@link #hasSkylightOffset()}), no bytes if not.
+         * Retrieve the starting index of the skylight data (4 bit per block). <p> This will be 2048 bytes in lenght if
+         * the skylight data exists (see {@link #hasSkylightOffset()}), no bytes if not.
          *
          * @return The starting location of the skylight data.
          */
@@ -127,10 +120,8 @@ public class ChunkPacketProcessor {
         }
 
         /**
-         * Retrieve the extra 4 bits in each block ID, if necessary.
-         * <p>
-         * This will be 2048 bytes in lenght if the extra data exists, no bytes
-         * if not.
+         * Retrieve the extra 4 bits in each block ID, if necessary. <p> This will be 2048 bytes in lenght if the extra
+         * data exists, no bytes if not.
          *
          * @return The starting location of the extra data.
          */
@@ -256,15 +247,14 @@ public class ChunkPacketProcessor {
     }
 
     /**
-     * Construct an array of chunk packet processors from a given MAP_CHUNK_BULK
-     * packet.
+     * Construct an array of chunk packet processors from a given MAP_CHUNK_BULK packet.
      *
      * @param packet - the map chunk bulk packet.
      * @return The chunk packet processors.
      */
     // The MAP_CHUNK_BULK packet no longer exists
     /*
-	 * public static ChunkPacketProcessor[] fromMapBulkPacket(PacketContainer
+     * public static ChunkPacketProcessor[] fromMapBulkPacket(PacketContainer
 	 * packet, World world) {
 	 * if (!packet.getType().equals(PacketType.Play.Server.MAP_CHUNK_BULK))
 	 * throw new IllegalArgumentException(packet +
@@ -330,8 +320,8 @@ public class ChunkPacketProcessor {
     }
 
     /**
-     * Retrieve the number of 2048 byte segments per chunklet. <p< This is usually one for The
-     * Overworld, and zero for both The End and The Nether.
+     * Retrieve the number of 2048 byte segments per chunklet. <p< This is usually one for The Overworld, and zero for
+     * both The End and The Nether.
      *
      * @return Number of skylight byte segments.
      */
@@ -356,6 +346,7 @@ public class ChunkPacketProcessor {
      * @author Kristian
      */
     public interface ChunkletProcessor {
+
         /**
          * Process a given chunklet (16x16x16).
          *
@@ -363,18 +354,18 @@ public class ChunkPacketProcessor {
          * @param data    - the data array.
          * @param offsets - the offsets with the data for the given chunklet.
          */
-        public void processChunklet(@Nonnull Location origin, @Nonnull byte[] data,
-                                    @Nonnull ChunkOffsets offsets);
+        void processChunklet(@Nonnull Location origin, @Nonnull byte[] data,
+                             @Nonnull ChunkOffsets offsets);
 
         /**
-         * Process the biome array for a chunk (16x256x16). <p> This method will not be called if
-         * the chunk is missing biome information.
+         * Process the biome array for a chunk (16x256x16). <p> This method will not be called if the chunk is missing
+         * biome information.
          *
          * @param origin     - the block with the lowest x, y and z coordinate in the chunk.
          * @param data       - the data array.
          * @param biomeIndex - the starting index of the biome data (256 bytes in lenght).
          */
-        public void processBiomeArray(@Nonnull Location origin, @Nonnull byte[] data,
-                                      int biomeIndex);
+        void processBiomeArray(@Nonnull Location origin, @Nonnull byte[] data,
+                               int biomeIndex);
     }
 }

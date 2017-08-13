@@ -1,11 +1,11 @@
 package io.indices.hideandseek;
 
+import javax.annotation.Nonnull;
+
 import com.voxelgameslib.voxelgameslib.game.AbstractGame;
 import com.voxelgameslib.voxelgameslib.game.GameDefinition;
 import com.voxelgameslib.voxelgameslib.game.GameInfo;
 import com.voxelgameslib.voxelgameslib.phase.phases.LobbyWithVotePhase;
-
-import javax.annotation.Nonnull;
 
 import io.indices.hideandseek.phases.ActivePhase;
 import io.indices.hideandseek.phases.GracePhase;

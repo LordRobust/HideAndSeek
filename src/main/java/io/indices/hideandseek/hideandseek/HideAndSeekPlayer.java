@@ -1,8 +1,8 @@
 package io.indices.hideandseek.hideandseek;
 
-import com.voxelgameslib.voxelgameslib.user.User;
-
 import javax.annotation.Nullable;
+
+import com.voxelgameslib.voxelgameslib.user.User;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class HideAndSeekPlayer {
+
     @Getter
     @Setter
     private User user;
@@ -37,10 +38,6 @@ public class HideAndSeekPlayer {
     public void setStationaryLocation(@Nullable Location location) {
         stationaryLocation = location;
 
-        if (location == null) {
-            isStationary = false;
-        } else {
-            isStationary = true;
-        }
+        isStationary = location != null;
     }
 }

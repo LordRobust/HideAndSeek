@@ -12,13 +12,6 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.voxelgameslib.voxelgameslib.VoxelGamesLib;
-import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
-import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
-import com.voxelgameslib.voxelgameslib.feature.features.MapFeature;
-import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
-import com.voxelgameslib.voxelgameslib.user.User;
-import com.voxelgameslib.voxelgameslib.user.UserHandler;
 
 import net.kyori.text.TextComponent;
 import net.kyori.text.format.TextColor;
@@ -36,6 +29,14 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import com.voxelgameslib.voxelgameslib.VoxelGamesLib;
+import com.voxelgameslib.voxelgameslib.components.scoreboard.Scoreboard;
+import com.voxelgameslib.voxelgameslib.feature.AbstractFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.MapFeature;
+import com.voxelgameslib.voxelgameslib.feature.features.ScoreboardFeature;
+import com.voxelgameslib.voxelgameslib.user.User;
+import com.voxelgameslib.voxelgameslib.user.UserHandler;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,10 +47,11 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import lombok.Setter;
+
 import io.indices.hideandseek.HideAndSeekGameData;
 import io.indices.hideandseek.hideandseek.HideAndSeekPlayer;
 import io.indices.hideandseek.util.NmsUtil;
-import lombok.Setter;
 
 public class GameFeature extends AbstractFeature {
 
@@ -130,6 +132,7 @@ public class GameFeature extends AbstractFeature {
 
             protocolManager.addPacketListener(new PacketAdapter(plugin, ListenerPriority.NORMAL,
                     PacketType.Play.Client.TELEPORT_ACCEPT) {
+
                 @Override
                 public void onPacketReceiving(@Nonnull PacketEvent event) {
                     hiders.forEach((hider) -> {

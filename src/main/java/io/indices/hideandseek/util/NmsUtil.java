@@ -5,6 +5,7 @@ import net.minecraft.server.v1_12_R1.Entity;
 import java.lang.reflect.Field;
 
 public class NmsUtil {
+
     public static int getNextEntityId() {
         int next = 0;
 
